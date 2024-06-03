@@ -59,7 +59,7 @@ def create_app(host: tuple=None) -> Flask:
 
     from .articles import tag
     app.register_blueprint(tag, url_prefix="/tags/")
-    
+
     from .surveys import surveys
     app.register_blueprint(surveys, url_prefix="/survey/")
 
@@ -68,7 +68,6 @@ def create_app(host: tuple=None) -> Flask:
 
     from .dev import dev
     app.register_blueprint(dev, url_prefix="/dev/")
-
 
     from . import models
 
@@ -83,9 +82,10 @@ def create_app(host: tuple=None) -> Flask:
     # initialize database
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
-    create_database(app)
+    with app.app_context():
+        db.create_all()
 
-    #---------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------
     # these functions, used by the entire website, have to go here to access the Flask application
 
     # used to give every template access to the categories (in order to display nav-bar)
@@ -117,12 +117,11 @@ def create_app(host: tuple=None) -> Flask:
             if error.code in (403, 404, 418, 500):
                 return ErrorPages.__special__(error)
             return ErrorPages.__generic__(error)
-    
-    
+
     return app
 
 
-#------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------
 """
 generates random string used as a secure private key
 """
